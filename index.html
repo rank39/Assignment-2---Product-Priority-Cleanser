@@ -1,0 +1,895 @@
+[index (1).html](https://github.com/user-attachments/files/33320695/index.1.html)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Product Priority Cleanser: OSAT Investigation / TestPAC</title>
+
+<!-- Tailwind (CDN). Preflight is off so it doesn't override the app's own styles. -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = { corePlugins: { preflight: false } };</script>
+
+<!-- React 18, Babel, Lucide icons, PapaParse (CSV) and SheetJS (Excel) -->
+<script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
+<script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<style>
+
+.pc{--ink:#17212B;--muted:#5C6B78;--paper:#EDF0F2;--card:#FFFFFF;--line:#D3DAE0;--accent:#0F5C6E;--hi:#B23A2E;--med:#A8701A;--lo:#4F6F5F;
+ font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:var(--paper);min-height:100vh;font-size:14px;line-height:1.5}
+.pc *{box-sizing:border-box}
+.pc h1,.pc h2,.pc h3{font-family:Georgia,"Times New Roman",serif;font-weight:600;margin:0;letter-spacing:-0.01em}
+.pc button{font:inherit;cursor:pointer}
+.pc :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.pc-head{background:var(--ink);color:#fff;padding:18px 28px;display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
+.pc-head h1{font-size:22px}.pc-head p{margin:2px 0 0;color:#AEBAC4;font-size:13px}
+.pc-tabs{display:flex;gap:4px;padding:0 28px;background:var(--ink);overflow-x:auto}
+.pc-tab{background:none;border:0;color:#AEBAC4;padding:10px 16px;border-bottom:3px solid transparent;white-space:nowrap}
+.pc-tab[aria-selected=true]{color:#fff;border-bottom-color:#7CC4D4}
+.pc-main{padding:24px 28px 60px;max-width:1280px;margin:0 auto}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:6px}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}.btn.primary:hover{background:#0B4A59}
+.btn.ghost-dark{background:transparent;border-color:#4A5A68;color:#fff}
+.btn:disabled{opacity:.5;cursor:default}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.stack{display:grid;gap:20px}
+.subtabs{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-bottom:14px;background:#fff}
+.subtabs button{border:0;background:#fff;padding:7px 16px;border-right:1px solid var(--line)}
+.subtabs button:last-child{border-right:0}
+.subtabs button[aria-selected=true]{background:var(--ink);color:#fff}
+textarea.mono{width:100%;min-height:150px;border:1px solid var(--line);border-radius:6px;padding:10px;font:12px/1.4 ui-monospace,Menlo,monospace;resize:vertical}
+.drop{border:2px dashed var(--line);border-radius:8px;padding:28px;text-align:center;color:var(--muted)}
+.drop.over{border-color:var(--accent);background:#E8F3F5}
+.msg{margin:6px 0 0;font-size:13px}.msg.err{color:var(--hi)}.msg.ok{color:var(--lo)}
+.top3{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:16px;margin:20px 0}
+.t3{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--hi);border-radius:8px;padding:18px;cursor:pointer;text-align:left;width:100%}
+.t3:nth-child(2){border-top-color:var(--med)}.t3:nth-child(3){border-top-color:#6B7B88}
+.t3 h3{font-size:19px;margin-bottom:6px}.t3:first-child h3{font-size:23px}
+.t3 .why{color:var(--muted);font-size:13px;margin:0}
+.big{font-family:Georgia,serif;font-size:34px;line-height:1}
+.layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(320px,1fr);gap:20px;align-items:start}
+table{border-collapse:collapse;width:100%}
+th{text-align:left;font-weight:600;font-size:12px;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid #E6EBEF;vertical-align:top}
+tr.row{cursor:pointer}tr.row:hover td{background:#F6F8F9}tr.row[aria-selected=true] td{background:#E8F3F5}
+tr.flag td{background:#FBECEA}
+.num{font-variant-numeric:tabular-nums}
+.bar{display:flex;height:12px;border-radius:2px;overflow:hidden;background:#E6EBEF;min-width:110px}.bar i{display:block;height:100%}
+.pill{display:inline-block;padding:1px 9px;border-radius:10px;font-size:12px;font-weight:600;color:#fff}
+.pill.High{background:var(--hi)}.pill.Medium{background:var(--med)}.pill.Low{background:var(--lo)}
+.src{display:inline-block;font-size:11px;padding:0 6px;border-radius:3px;border:1px solid var(--line);color:var(--muted)}
+.src.human{border-color:var(--accent);color:var(--accent);font-weight:600}
+.tag{font-size:12px;color:var(--muted)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:0 0 10px}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;margin-right:5px;border-radius:2px;background:var(--c)}
+blockquote{margin:0 0 10px;padding:6px 12px;border-left:3px solid var(--accent);background:#F6F8F9;font-size:13px}
+ul.checks{list-style:none;padding:0;margin:0}
+ul.checks li{display:flex;gap:8px;margin:0 0 7px;font-size:13px}
+ul.checks li b{flex:none;width:58px;font-size:11px;padding:1px 0;border-radius:3px;text-align:center;height:18px;line-height:18px;color:#fff}
+ul.checks li b.ok{background:var(--lo)}ul.checks li b.warn{background:var(--med)}
+.field{display:block;margin:12px 0 0}.field>span{display:block;font-size:12px;color:var(--muted);margin-bottom:3px}
+.field input,.field textarea,.field select{width:100%;border:1px solid var(--line);border-radius:6px;padding:7px 9px;font:inherit;background:#fff}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{border:0;background:#fff;padding:6px 14px;border-right:1px solid var(--line)}.seg button:last-child{border-right:0}
+.seg button[aria-pressed=true]{background:var(--ink);color:#fff}
+.seg button[aria-pressed=true].High{background:var(--hi)}.seg button[aria-pressed=true].Medium{background:var(--med)}.seg button[aria-pressed=true].Low{background:var(--lo)}
+.weights,.assume{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:12px}
+.assume{grid-template-columns:repeat(5,1fr)}
+.weights input[type=range]{width:100%}
+.old{text-decoration:line-through;color:var(--hi);background:#FBECEA;padding:0 4px;border-radius:3px}
+.new{color:#1E5B3A;background:#E3F2E9;padding:0 4px;border-radius:3px}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--ink);color:#fff;padding:10px 16px;border-radius:6px}
+.row-between{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:20px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.kpi .v{font-family:Georgia,serif;font-size:26px;line-height:1.1}.kpi .l{font-size:12px;color:var(--muted)}
+.chart{height:280px}
+pre.spec{white-space:pre-wrap;font:12.5px/1.55 ui-monospace,Menlo,monospace;background:#F6F8F9;border:1px solid var(--line);border-radius:6px;padding:16px;max-height:520px;overflow:auto;margin:0}
+@media (max-width:980px){.grid2,.top3,.layout{grid-template-columns:1fr}.weights{grid-template-columns:1fr 1fr}.assume{grid-template-columns:1fr 1fr}.pc-main{padding:16px}}
+
+.btn,.pc-tab{display:inline-flex;align-items:center;gap:6px}
+body{margin:0}
+
+</style>
+</head>
+<body>
+<div id="root"><div id="boot" class="flex items-center justify-center text-slate-500" style="height:100vh;font-family:system-ui,sans-serif">Loading Product Priority Cleanser…</div></div>
+<script>
+  // If a CDN script is blocked or offline, say so instead of leaving a blank page.
+  setTimeout(function () {
+    var boot = document.getElementById("boot");
+    if (boot) boot.textContent = "Couldn't load the app. Check your internet connection or whether a CDN (unpkg, cdnjs, tailwindcss.com) is blocked, then reload.";
+  }, 12000);
+</script>
+
+<script type="text/babel" data-presets="react">
+const { useState, useMemo, useEffect, useRef } = React;
+
+/* ================= Embedded case data (from BRUIN_TestPAC workbook raw sheets) ================= */
+const CASE = {"apache":[["James",95.479,95.1605,94.8755,95.3055,95.7065,95.4785,95.115,95.937,95.263,95.0975,95.506,95.2225,95.5565,95.2015,95.6425,95.188,95.5145,95.3895,95.016,95.647,95.1865,95.393,95.602,95.2655,95.6505,95.1245,94.778,95.55,95.0605,95.315,95.1605,95.0135],["Michael",95.579,95.0905,95.0155,95.1555,95.6165,95.6885,94.955,95.637,95.423,95.0275,95.346,94.9725,95.3565,95.0815,95.6725,95.158,95.4145,95.4395,95.046,95.457,95.0265,95.353,95.562,95.0655,95.4305,95.3245,95.068,95.37,94.9505,95.345,95.3105,94.9635],["John",95.429,94.9205,94.9555,95.3255,95.8065,95.5185,94.895,95.857,95.193,94.9975,95.446,94.9225,95.2665,95.0615,95.6225,95.238,95.5545,95.4895,94.956,95.617,95.3565,95.573,95.792,95.3555,95.7005,95.2945,94.918,95.38,94.7705,95.475,95.0805,94.8735],["Robert",95.599,95.0505,95.0655,95.3655,95.6865,95.6485,94.895,95.597,95.173,95.1175,95.476,95.1125,95.4165,95.2715,95.6225,95.038,95.5045,95.4395,94.896,95.537,95.0265,95.173,95.562,95.1755,95.6205,95.0345,95.078,95.49,94.9605,95.245,95.0905,94.9635],["David",95.469,95.0105,95.0755,95.1855,95.5665,95.7185,95.055,95.607,95.343,95.0275,95.656,94.8825,95.5065,95.3215,95.4225,95.108,95.5345,95.5395,95.026,95.417,95.0265,95.213,95.872,95.3655,95.4405,95.3345,95.028,95.46,94.7105,95.185,95.1005,94.9735],["William",95.419,95.0105,94.9455,95.2755,95.7865,95.7385,95.065,95.747,95.163,94.9075,95.546,95.2125,95.2465,95.2815,95.7025,95.238,95.6045,95.7195,95.066,95.317,95.2465,95.313,95.612,95.1955,95.5805,95.1545,94.828,95.27,95.0705,95.365,95.2305,95.0535],["Richard",95.319,94.8405,94.8255,95.1155,95.6365,95.5385,95.155,95.707,95.393,94.8875,95.386,95.1925,95.3865,95.2515,95.5825,95.148,95.6045,95.4195,94.966,95.417,95.1565,95.363,95.732,95.2955,95.5005,95.0545,95.018,95.23,94.7505,95.325,95.2205,94.8935],["Joseph",95.549,94.8805,95.0155,95.3155,95.5865,95.4885,95.115,95.947,95.103,95.0575,95.576,95.0525,95.2865,95.1215,95.5825,94.988,95.2445,95.4395,95.066,95.527,95.2565,95.533,95.522,95.2555,95.5605,95.3145,94.758,95.18,94.7305,95.475,95.2105,95.1435],["Thomas",95.479,94.8705,94.8555,95.3755,95.8365,95.5785,95.075,95.587,95.403,94.7875,95.576,94.9225,95.3365,95.3315,95.7425,95.068,95.2945,95.6795,95.146,95.637,95.0365,95.463,95.642,95.3155,95.7705,95.1145,94.948,95.41,94.8605,95.115,95.0605,94.7735],["Christopher",95.429,94.9005,94.8155,95.1955,95.5365,95.4285,95.165,95.867,95.263,94.9975,95.296,95.2125,95.4165,95.0515,95.8025,95.298,95.3145,95.5395,94.886,95.327,95.3365,95.523,95.762,95.0855,95.5505,95.0945,94.998,95.32,94.7205,95.245,95.2205,95.0135],["Mary",95.259,95.1605,94.8355,95.1055,95.7165,95.3885,95.105,95.887,95.043,95.0575,95.466,95.0725,95.4565,95.0615,95.7825,95.098,95.5045,95.3295,95.116,95.587,95.0765,95.513,95.762,95.3555,95.7705,95.1845,95.118,95.17,94.8405,95.185,95.1605,94.8435],["Patricia",95.409,94.9105,94.9355,95.1355,95.6765,95.7285,94.925,95.667,95.043,94.7475,95.656,95.0425,95.3765,95.3015,95.5225,95.018,95.2945,95.4195,95.056,95.667,95.1665,95.323,95.722,95.1255,95.7505,95.1945,95.118,95.43,94.8505,95.305,95.0705,95.0035],["Jennifer",95.459,95.1405,94.9455,95.1255,95.5565,95.7385,94.855,95.777,95.393,95.1075,95.556,95.1625,95.5465,95.0715,95.7425,94.978,95.5445,95.6995,94.766,95.407,95.2665,95.193,95.532,95.3455,95.4505,95.3545,94.838,95.38,94.8805,95.495,95.1405,94.8135],["Linda",95.239,95.2205,95.0755,95.0755,95.6565,95.6985,95.035,95.757,95.183,95.0875,95.296,95.1725,95.3565,95.0415,95.7225,95.228,95.3245,95.4595,94.766,95.367,95.1165,95.263,95.782,95.0155,95.7905,95.1345,94.988,95.53,94.9405,95.165,95.0105,94.7435],["Elizabeth",95.629,95.2005,94.9555,95.2655,95.5465,95.6985,94.955,95.927,95.183,94.9775,95.306,95.1225,95.4565,95.0315,95.5225,95.158,95.3445,95.4695,94.786,95.317,95.2865,95.523,95.632,95.3555,95.6105,95.0645,95.098,95.32,94.8605,95.145,95.1205,95.0635],["Barbara",95.189,94.6705,94.6555,94.9455,95.3865,95.2685,94.795,95.587,95.023,94.6775,95.066,94.9825,95.1165,95.0315,95.3625,94.948,95.1045,95.4595,94.916,95.197,94.7865,94.943,95.512,95.0355,95.4105,94.8445,94.818,95.05,94.5405,95.235,95.0505,94.7235],["Susan",95.279,95.0005,95.0555,95.3655,95.8065,95.4185,94.945,95.667,95.043,94.8475,95.336,95.2225,95.2465,95.0615,95.4725,95.268,95.5845,95.4395,94.786,95.347,95.1365,95.493,95.732,95.2855,95.7705,95.3645,95.108,95.22,95.0005,95.465,95.3105,95.1435],["Jessica",95.579,94.9905,94.7655,95.0855,95.4865,95.7085,95.155,95.747,95.213,95.0875,95.506,94.8925,95.2565,95.1315,95.4625,95.088,95.4745,95.7295,94.776,95.307,95.1165,95.553,95.712,95.2055,95.7805,95.0945,95.118,95.2,94.7105,95.475,95.2305,95.1435],["Karen",95.269,95.0305,94.7755,95.1155,95.5665,95.7085,95.165,95.787,95.053,95.0875,95.666,94.9225,95.5865,94.9615,95.7425,94.988,95.4445,95.3295,94.966,95.687,95.3465,95.353,95.512,95.1455,95.4205,95.3445,94.898,95.16,94.8705,95.165,95.1805,94.9535],["Sarah",95.489,95.0305,94.8155,95.0955,95.7065,95.7385,95.225,95.657,95.323,95.0975,95.366,95.0225,95.2665,95.3215,95.5425,95.238,95.3045,95.5395,94.856,95.447,95.0165,95.183,95.752,95.0955,95.5405,95.3145,94.818,95.43,94.9905,95.285,95.3805,95.0035],["Edward",95.579,95.2305,95.0955,95.3355,95.6465,95.5685,94.845,95.907,95.073,94.8775,95.686,94.9625,95.3465,95.1115,95.6625,95.288,95.5245,95.5095,94.766,95.637,95.1265,95.433,95.662,95.0855,95.7105,95.2945,94.778,95.55,94.7605,95.315,95.2905,95.1435],["Ryan",95.629,94.9005,94.8155,95.1455,95.5065,95.4885,94.935,95.807,95.383,94.8675,95.496,95.2125,95.3265,95.1815,95.6625,94.918,95.4545,95.3495,94.786,95.677,95.2065,95.323,95.872,95.2355,95.4605,95.1645,94.968,95.16,94.8305,95.425,95.3205,94.7635],["Cynthia",95.499,95.2205,94.8855,95.1055,95.5965,95.5085,94.925,95.597,95.273,94.9075,95.346,95.0825,95.2865,95.1315,95.7425,94.938,95.4545,95.3795,95.116,95.397,95.2665,95.473,95.722,95.1855,95.6505,95.0145,94.958,95.42,94.9705,95.425,95.3705,94.9935],["Amanda",95.529,94.8705,95.1355,94.9955,95.5365,95.5085,95.045,95.887,95.383,94.8775,95.386,95.1225,95.5665,94.9715,95.4925,94.928,95.4145,95.7095,94.926,95.297,95.1765,95.523,95.522,95.0155,95.5105,95.2845,94.748,95.27,94.9405,95.475,95.1605,94.9635]],"odyssey":[["James",97.1525,97.1005,96.992,97.1775,97.3595,97.0515,96.995,97.232,97.1095,96.831,97.1885,97.186,97.091,96.898,97.1925,97.017,96.991,97.1825,97.067,97.3225,96.9655,97.2845,97.3725,97.1565,97.3485,97.14,97.0365,96.916,96.838,97.158,97.254,96.9355],["Michael",97.0525,96.8405,96.802,97.1575,97.1595,97.2215,96.935,97.352,96.9995,97.111,97.3585,96.956,97.171,97.218,97.3625,96.947,97.101,97.2725,96.927,96.9825,97.1255,97.3245,97.3125,96.9865,97.3885,97.03,97.0465,97.306,96.808,97.228,97.214,96.9555],["John",97.1525,96.8605,96.922,97.0375,97.3495,97.0215,97.055,97.192,96.9795,97.171,97.1785,97.196,97.321,97.078,97.3625,97.237,97.151,97.2425,97.187,97.0625,97.2655,97.2745,97.2325,96.8865,97.1885,97.24,96.8765,97.156,97.168,97.208,96.924,96.9855],["Robert",97.1125,96.9805,96.852,96.9475,97.1795,97.3615,96.855,97.252,97.0595,97.131,97.0885,97.096,97.081,96.908,97.1325,97.157,97.331,97.2625,96.967,97.2225,97.0655,96.9545,97.3525,97.2165,97.0585,97.08,96.8565,97.296,96.808,97.268,96.874,97.0055],["David",97.0725,96.8205,97.142,96.9375,97.2595,97.2715,97.115,97.072,96.9795,97.051,97.3085,96.866,97.061,96.978,97.0925,97.237,97.111,97.1625,96.997,97.0425,97.2355,97.2445,97.2625,97.1065,97.2985,97.0,96.8565,96.946,96.978,96.948,97.004,96.9155],["William",97.1225,97.1805,97.012,97.0575,97.3495,97.3515,96.855,97.182,96.8895,97.001,97.1685,97.036,97.031,97.208,97.3025,97.177,97.181,97.1325,96.837,97.0725,96.9355,97.2445,97.3725,97.1365,97.1185,97.07,97.0565,97.256,97.098,97.248,97.254,97.1355],["Richard",96.9725,96.9205,96.792,96.9775,97.0495,97.2215,97.095,97.262,96.9095,96.831,97.2085,96.946,97.091,96.998,97.2525,96.987,97.301,97.1225,97.097,97.3525,97.2155,96.9845,97.3125,97.0965,97.2685,97.11,97.1465,97.296,96.968,97.238,97.184,97.0355],["Joseph",97.1525,96.8305,97.102,97.0675,97.1295,97.1115,97.125,97.212,97.0995,97.051,97.2985,96.996,96.961,96.958,97.1025,97.097,97.141,97.0425,97.147,97.1625,96.9955,97.1445,97.1325,97.0165,97.1785,96.93,96.8965,97.286,96.948,96.978,97.164,96.8555],["Thomas",97.0425,96.9905,96.862,97.2475,97.3595,97.2215,97.175,97.032,97.2395,96.871,97.2685,97.136,96.981,96.918,97.2525,96.887,97.021,97.3625,96.947,97.1025,96.8955,97.2245,97.0325,97.0865,97.1885,97.25,97.0465,97.206,97.188,97.078,97.244,97.1255],["Christopher",97.0325,97.0105,97.062,97.1675,97.0295,97.0515,97.085,97.302,96.8995,97.141,97.0485,96.976,97.261,96.948,97.0425,97.257,97.141,97.3825,97.077,97.1525,97.1055,97.0245,97.1025,96.9265,97.2585,97.04,96.8565,96.996,97.028,97.118,96.884,97.0355],["Mary",96.9725,97.1805,96.832,96.9975,97.2395,97.2415,97.025,97.262,97.0895,97.091,97.1085,96.846,97.351,96.898,97.3925,96.867,97.101,97.3025,97.037,97.1725,97.0155,97.0845,97.0025,97.2165,97.3185,97.09,96.8165,97.016,97.128,96.928,97.144,97.0055],["Patricia",97.3325,96.9605,96.802,96.9775,97.0895,97.0115,96.955,97.072,97.2195,97.071,97.0285,97.026,97.281,96.968,96.9925,96.917,97.001,97.0325,97.177,97.0825,96.9755,97.0545,97.1225,97.0965,97.3285,97.01,97.1965,97.196,96.828,97.188,97.154,97.1155],["Jennifer",97.1525,96.8205,96.972,96.9475,97.0695,97.0515,97.115,97.382,97.0595,96.861,97.3085,97.086,97.141,96.988,97.1025,97.027,96.981,97.1425,97.177,97.2325,97.1755,97.3045,97.2125,97.2265,97.0185,97.17,96.9465,97.206,96.998,97.308,97.034,97.1255],["Linda",97.0925,97.1805,96.862,97.1375,97.3195,97.1115,97.165,97.352,96.9695,97.061,97.0085,97.126,97.051,97.148,97.2125,96.887,97.081,97.1625,97.147,97.3225,97.1555,97.3345,97.1825,97.1165,97.1885,97.14,97.0765,96.936,96.838,97.148,96.914,97.0055],["Elizabeth",97.2425,96.9905,97.162,97.0475,97.0795,97.1615,96.935,97.122,97.0695,97.001,97.3185,96.956,97.041,97.008,97.3525,96.997,97.331,97.0025,96.827,97.1325,97.1255,97.0345,97.0025,97.2265,97.2385,97.26,96.8965,97.196,97.058,96.948,96.884,97.0955],["Barbara",97.3125,96.8105,97.112,96.9175,97.0495,97.1715,96.945,97.242,96.9995,97.181,97.0385,97.186,97.091,97.048,97.3525,96.897,96.951,97.0225,97.157,97.3325,97.1955,97.2445,97.1125,97.2565,97.0385,97.13,97.1565,97.046,97.128,97.078,97.064,97.0555],["Susan",97.1925,97.0705,97.142,97.0675,96.9995,97.2515,96.875,97.022,97.0795,97.021,97.1885,97.036,97.231,97.178,97.2625,96.987,97.301,97.0625,96.837,97.3025,97.2655,96.9845,97.1525,97.1365,97.1385,97.19,96.9465,97.226,96.918,97.258,96.994,96.8855],["Jessica",97.3325,96.8705,96.962,96.9175,97.3195,97.1315,97.185,97.202,96.9195,97.101,96.9885,97.076,97.131,97.178,97.1425,96.857,97.031,97.1725,97.157,97.2625,96.9655,97.0445,97.3225,97.0465,97.2885,97.14,97.1565,97.126,96.998,97.198,97.024,97.0355],["Karen",97.1625,96.8305,97.042,96.8875,97.2695,97.3615,97.015,97.312,97.2695,97.061,97.1085,96.936,97.191,97.048,97.2625,97.137,97.151,96.9925,96.957,97.3025,96.9155,97.0445,97.0625,97.0465,97.1385,97.06,96.9065,97.066,97.158,96.978,96.994,97.1355],["Sarah",97.2625,97.0805,97.032,96.8775,97.1695,97.0715,97.165,97.422,97.0095,96.961,97.2085,96.836,97.081,96.888,97.1025,97.117,97.311,96.9925,97.117,97.2725,97.0155,97.2945,97.2825,97.2665,97.3385,97.25,97.0265,97.106,96.808,97.008,97.004,96.8455],["Edward",97.1225,96.8305,96.822,97.0975,97.2795,97.3315,97.205,97.042,97.0795,96.841,96.9685,97.226,97.061,96.878,97.2325,96.907,97.121,97.0625,97.097,97.1125,97.2655,97.1245,97.0725,97.0565,97.0885,97.05,96.8465,97.016,97.148,97.288,97.074,97.2055],["Ryan",97.3425,97.0805,97.042,97.0975,97.0095,97.4015,97.195,97.052,97.0595,96.911,97.1985,97.146,97.221,96.878,97.3225,97.177,97.241,97.1725,96.907,97.0325,96.9455,97.1545,97.1825,96.9165,97.3785,97.17,97.2065,97.006,96.948,97.018,96.964,96.9855],["Cynthia",97.1325,96.9105,96.962,96.8975,97.2895,97.3915,97.135,97.342,97.0495,97.171,97.2685,97.026,97.121,96.928,97.3625,96.897,97.011,97.2625,97.137,97.1625,97.0655,97.0545,97.2925,97.1065,97.1585,96.91,97.1865,96.946,96.938,97.078,97.074,97.2055],["Amanda",97.2325,97.1905,97.092,97.1775,97.0395,97.1515,97.105,97.122,97.0595,96.801,97.3085,97.176,97.321,97.198,97.3125,97.077,97.321,97.3625,97.097,97.1825,96.9555,97.2045,97.2325,96.9665,97.2985,96.89,96.9965,97.296,97.088,97.288,96.924,96.9055]],"solar":[64,5,1,23,77,97,10,90,36,9,70,19,83,21,85,36,71,87,4,92,41,76,82,39,97,27,14,44,15,62,39,23],"humidity":[35,4,21,0,6,82,20,6,21,43,33,43,93,9,40,66,53,70,26,95,54,91,5,42,68,15,57,8,79,74,47,84]};
+
+
+const PRODUCT_COLORS = ["#0F5C6E", "#C0675A", "#C9A24B", "#6B8CA8"];
+const ASP_DEFAULT = { apache: 175, odyssey: 145 };
+const DEFAULT_A = { units: 10000, savings: 1250000, idealSolar: 99, idealHum: 0, zThreshold: 3 };
+const DEFAULT_W = { persist: 25, sev: 25, value: 20, impact: 30 };
+const PRIORITIES = ["High", "Medium", "Low"];
+const CATEGORIES = [
+  "Operator integrity", "Environmental yield loss", "Contract economics",
+  "Power quality / stability", "Cooling & humidity", "Tester or equipment health",
+  "Test coverage / program", "Data quality / measurement", "Security & chip diversion",
+  "Vendor / SLA compliance", "Monitoring / process gap", "Other",
+];
+const STORE_KEY = "bruin-priority-cleanser-v1";
+const COMP_COLORS = { persist: "#6B8CA8", sev: "#C0675A", value: "#C9A24B", impact: "#2B2F3A" };
+
+
+/* Browser storage (replaces Claude artifact storage so reviews persist in this browser) */
+const store = {
+  get: async (k) => { const v = localStorage.getItem(k); if (v == null) throw new Error("not found"); return { value: v }; },
+  set: async (k, v) => { localStorage.setItem(k, v); return { key: k, value: v }; },
+};
+
+/* ================= Math helpers ================= */
+const sum = (a) => a.reduce((x, y) => x + y, 0);
+const mean = (a) => (a.length ? sum(a) / a.length : 0);
+const std = (a) => { if (a.length < 2) return 0; const m = mean(a); return Math.sqrt(sum(a.map((x) => (x - m) ** 2)) / (a.length - 1)); };
+const clamp = (n, a = 0, b = 1) => Math.min(b, Math.max(a, n));
+const sgn = (n, d = 2) => (n >= 0 ? "+" : "−") + Math.abs(n).toFixed(d);
+const usd = (n) => { const a = Math.abs(n), s = n < 0 ? "−" : ""; return a >= 1e6 ? `${s}$${(a / 1e6).toFixed(2)}M` : a >= 1e3 ? `${s}$${(a / 1e3).toFixed(1)}K` : `${s}$${a.toFixed(0)}`; };
+const num0 = (n) => Math.round(n).toLocaleString();
+const band = (v) => (v < 33 ? "Low" : v < 66 ? "Medium" : "High");
+
+function ols2(y, x1, x2) {
+  const n = y.length, ym = mean(y), m1 = mean(x1), m2 = mean(x2);
+  const cov = (a, ma, b, mb) => sum(a.map((v, i) => (v - ma) * (b[i] - mb))) / (n - 1);
+  const v1 = cov(x1, m1, x1, m1), v2 = cov(x2, m2, x2, m2), c12 = cov(x1, m1, x2, m2);
+  const c1y = cov(x1, m1, y, ym), c2y = cov(x2, m2, y, ym);
+  const det = v1 * v2 - c12 * c12;
+  const b1 = (c1y * v2 - c2y * c12) / det, b2 = (c2y * v1 - c1y * c12) / det, b0 = ym - b1 * m1 - b2 * m2;
+  const pred = y.map((_, i) => b0 + b1 * x1[i] + b2 * x2[i]);
+  const ssr = sum(y.map((v, i) => (v - pred[i]) ** 2)), sst = sum(y.map((v) => (v - ym) ** 2));
+  return { b0, b1, b2, r2: sst ? 1 - ssr / sst : 0, pred, corr12: c12 / Math.sqrt(v1 * v2) };
+}
+
+/* ================= Parsing ================= */
+const isDayHeader = (h) => /^(day\s*)?\d+$/i.test(String(h).trim());
+const cleanName = (s) => String(s || "").replace(/\.(xlsx|xls|csv|tsv|txt)$/i, "").replace(/\b(file|raw|yield|yields|data|matrix)\b/gi, "").replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim() || "Product";
+const toNum = (v) => { if (typeof v === "number") return v; const n = parseFloat(String(v).replace("%", "").replace(/,/g, "")); return Number.isFinite(n) ? n : NaN; };
+
+function parseGrid(grid, hintName) {
+  const g = grid.filter((r) => r && r.some((c) => c !== "" && c != null));
+  if (g.length < 2) return null;
+  const head = g[0].map((c) => String(c ?? "").trim());
+  const labels = g.map((r) => String(r[0] ?? ""));
+  // Weather, metrics in rows
+  const sRow = g.find((r) => /solar/i.test(String(r[0] ?? "")));
+  const hRow = g.find((r) => /humid/i.test(String(r[0] ?? "")));
+  if (sRow && hRow) {
+    const solar = sRow.slice(1).map(toNum).filter((x) => !Number.isNaN(x));
+    const humidity = hRow.slice(1).map(toNum).filter((x) => !Number.isNaN(x));
+    if (solar.length >= 5 && humidity.length === solar.length) return { kind: "weather", solar, humidity };
+  }
+  // Weather, metrics in columns
+  const sCol = head.findIndex((h) => /solar/i.test(h)), hCol = head.findIndex((h) => /humid/i.test(h));
+  if (sCol >= 0 && hCol >= 0) {
+    const rows = g.slice(1);
+    const solar = rows.map((r) => toNum(r[sCol])), humidity = rows.map((r) => toNum(r[hCol]));
+    if (solar.length >= 5 && ![...solar, ...humidity].some(Number.isNaN)) return { kind: "weather", solar, humidity };
+  }
+  // Product matrix
+  const dayCols = head.map((h, i) => (i > 0 && isDayHeader(h) ? i : -1)).filter((i) => i > 0);
+  if (/operator|tester|name|engineer/i.test(head[0]) && dayCols.length >= 5) {
+    const operators = [], data = [];
+    for (const r of g.slice(1)) {
+      const vals = dayCols.map((i) => toNum(r[i]));
+      if (String(r[0]).trim() && vals.every((v) => !Number.isNaN(v))) { operators.push(String(r[0]).trim()); data.push(vals); }
+    }
+    if (operators.length >= 3) {
+      const mx = Math.max(...data.flat());
+      const scaled = mx <= 1.0 ? data.map((r) => r.map((v) => v * 100)) : data;
+      return { kind: "product", name: cleanName(hintName), operators, data: scaled };
+    }
+  }
+  return null;
+}
+
+/* ================= Analysis engine ================= */
+function analyze(products, weather, A) {
+  if (!products.length) return null;
+  const D = Math.min(...products.map((p) => p.data[0].length));
+  const weatherOK = !!weather && weather.solar.length >= D;
+  const solar = weatherOK ? weather.solar.slice(0, D) : [], hum = weatherOK ? weather.humidity.slice(0, D) : [];
+
+  const prods = products.map((p, pi) => {
+    const nOps = p.data.length;
+    const rows = p.data.map((r) => r.slice(0, D));
+    const opAvg = rows.map(mean), overall = mean(opAvg), sd = std(opAvg);
+    const dayMin = Array.from({ length: D }, (_, d) => Math.min(...rows.map((r) => r[d])));
+    const ops = p.operators.map((name, i) => {
+      const others = rows.filter((_, k) => k !== i);
+      const peerAvg = mean(others.map(mean));
+      const peerDaily = Array.from({ length: D }, (_, d) => mean(others.map((r) => r[d])));
+      const z = sd ? (opAvg[i] - overall) / sd : 0, delta = opAvg[i] - peerAvg;
+      const flagged = z <= -A.zThreshold;
+      const lostUnits = flagged && delta < 0 ? (-delta / 100) * A.units * D : 0;
+      return {
+        name, idx: i, avg: opAvg[i], peerAvg, delta, z, flagged, peerDaily, daily: rows[i],
+        below: rows[i].filter((v, d) => v < peerDaily[d]).length,
+        lowest: rows[i].filter((v, d) => v === dayMin[d]).length,
+        lostUnits, revenue: lostUnits * p.asp,
+      };
+    });
+    const clean = rows.filter((_, i) => !ops[i].flagged);
+    const dailyAll = Array.from({ length: D }, (_, d) => mean(rows.map((r) => r[d])));
+    const dailyBase = Array.from({ length: D }, (_, d) => mean(clean.map((r) => r[d])));
+    const baseMean = mean(dailyBase);
+    let model = null, env = null, bands = null;
+    if (weatherOK) {
+      model = ols2(dailyBase, solar, hum);
+      const ideal = model.b0 + model.b1 * A.idealSolar + model.b2 * A.idealHum;
+      const gap = Math.max(0, ideal - baseMean);
+      const lostUnits = (gap / 100) * A.units * D * nOps;
+      env = { ideal, gap, lostUnits, revenue: lostUnits * p.asp, gapDays: model.pred.filter((v) => v < ideal).length };
+      const bandMean = (arr) => ["Low", "Medium", "High"].map((b) => { const v = dailyBase.filter((_, d) => band(arr[d]) === b); return v.length ? mean(v) : null; });
+      bands = { solar: bandMean(solar), hum: bandMean(hum) };
+    }
+    return { ...p, color: PRODUCT_COLORS[pi % 4], nOps, D, ops, overall, dailyAll, dailyBase, baseMean, model, env, bands,
+      flagged: ops.filter((o) => o.flagged), opRevenue: sum(ops.map((o) => o.revenue)), opLost: sum(ops.map((o) => o.lostUnits)) };
+  });
+
+  const envRevenue = sum(prods.map((p) => (p.env ? p.env.revenue : 0)));
+  const opRevenue = sum(prods.map((p) => p.opRevenue));
+  const totalGap = envRevenue + opRevenue; // environment + operator deviation, as in the memo
+  return { prods, D, weatherOK, solar, hum, envRevenue, opRevenue, totalGap, net: totalGap - A.savings };
+}
+
+function buildFindings(an, A, W) {
+  if (!an) return { findings: [] };
+  const maxASP = Math.max(...an.prods.map((p) => p.asp));
+  const money = (v) => clamp(Math.log10(1 + Math.max(0, v)) / 7); // log scale, $10M = 100%
+  const out = [];
+  const wsum = sum(Object.values(W)) || 1;
+  const score = (c) => { const contrib = {}; let s = 0; for (const k of Object.keys(c)) { contrib[k] = (W[k] / wsum) * c[k] * 100; s += contrib[k]; } return { contrib, score: s }; };
+
+  for (const p of an.prods) {
+    for (const o of p.flagged) {
+      const comps = { persist: o.below / p.D, sev: clamp(Math.abs(o.z) / 5), value: p.asp / maxASP, impact: money(o.revenue) };
+      const others = an.prods.filter((q) => q !== p);
+      const checks = [
+        { ok: true, text: `Z-score ${sgn(o.z)} is beyond the −${A.zThreshold} threshold (vs. all ${p.nOps} operator averages).` },
+        { ok: o.below / p.D >= 0.75, text: `Below the peer average on ${o.below} of ${p.D} days; lowest of all operators on ${o.lowest} days.` },
+        ...others.map((q) => { const oo = q.ops[o.idx]; return oo && oo.name === o.name
+          ? { ok: !oo.flagged, text: oo.flagged ? `Also flagged on ${q.name} (z ${sgn(oo.z)}). Points to a tester or operator-wide issue, not a product-specific one.` : `Normal on ${q.name} (z ${sgn(oo.z)}). The deficit is specific to ${p.name}.` }
+          : null; }).filter(Boolean),
+        { ok: true, text: "Weather-neutral: the comparison is within the same day, so solar and humidity affect every operator equally." },
+        { ok: false, text: "Caution: a statistical outlier is a lead, not proof of wrongdoing. Confirm with Bin 1 reconciliation and tester logs." },
+      ];
+      const { contrib, score: s } = score(comps);
+      out.push({
+        key: `op|${p.name}|${o.name}`, systemName: `${o.name}: ${p.name} yield deficit`, systemCategory: "Operator integrity",
+        affected: `${p.name}, tester #${o.idx + 1}`, metric: `z ${sgn(o.z)}, ${sgn(o.delta, 3)} pp`, revenue: o.revenue,
+        comps, contrib, score: s,
+        summary: `${o.name}'s ${p.name} yield averages ${o.avg.toFixed(3)}% against ${o.peerAvg.toFixed(3)}% for peers. That is about ${num0(o.lostUnits)} units, or ${usd(o.revenue)} at $${p.asp} ASP.`,
+        evidence: [
+          `${o.name} averages ${o.avg.toFixed(4)}% on ${p.name} vs. ${o.peerAvg.toFixed(4)}% for the other ${p.nOps - 1} operators (${sgn(o.delta, 4)} pp).`,
+          `Estimated loss: ${num0(o.lostUnits)} units across ${p.D} lots of ${num0(A.units)}, ${usd(o.revenue)} at $${p.asp}.`,
+        ],
+        checks,
+        action: `Escalate to security: reconcile Bin 1 counts and audit tester #${o.idx + 1} logs. Consider suspending ${o.name}'s access while the review runs.`,
+      });
+    }
+    if (p.env) {
+      const m = p.model;
+      const comps = { persist: m.r2, sev: clamp(p.env.gap / 0.5), value: p.asp / maxASP, impact: money(p.env.revenue) };
+      const { contrib, score: s } = score(comps);
+      out.push({
+        key: `env|${p.name}`, systemName: `${p.name} yield sensitivity to solar and humidity`, systemCategory: "Environmental yield loss",
+        affected: `${p.name}, all testers`, metric: `R² ${m.r2.toFixed(3)}, gap ${p.env.gap.toFixed(3)} pp`, revenue: p.env.revenue,
+        comps, contrib, score: s,
+        summary: `Weather explains ${(m.r2 * 100).toFixed(1)}% of daily ${p.name} yield variation. Versus ideal conditions the yield gap is ${p.env.gap.toFixed(3)} pp, worth ${usd(p.env.revenue)}.`,
+        evidence: [
+          `+10 solar points: ${sgn(m.b1 * 10, 3)} pp. +10 humidity points: ${sgn(m.b2 * 10, 3)} pp.`,
+          `Modeled ideal yield ${p.env.ideal.toFixed(3)}% (solar ${A.idealSolar}, humidity ${A.idealHum}) vs. ${p.baseMean.toFixed(3)}% observed baseline.`,
+          `${num0(p.env.lostUnits)} modeled lost units, ${usd(p.env.revenue)} at $${p.asp}.`,
+        ],
+        checks: [
+          { ok: m.r2 >= 0.8, text: `Model fit R² = ${m.r2.toFixed(4)} across ${p.D} days.` },
+          { ok: Math.abs(m.corr12) < 0.7, text: `Solar and humidity correlation is ${m.corr12.toFixed(2)}, so their effects can be separated.` },
+          { ok: true, text: p.flagged.length ? `Baseline excludes flagged operator(s) (${p.flagged.map((o) => o.name).join(", ")}) to isolate the facility effect.` : "No operators excluded from the baseline." },
+          { ok: false, text: "Caution: the gap versus ideal conditions is a modeled scenario, not an observed accounting loss." },
+        ],
+        action: `Require dedicated power conditioning and dehumidified chilled water for ${p.name}, or test it at a controlled facility. Re-measure after any upgrade.`,
+      });
+    }
+  }
+  if (an.weatherOK && an.prods.some((p) => p.env)) {
+    const ratio = an.totalGap / A.savings;
+    const gapDays = Math.max(...an.prods.map((p) => (p.env ? p.env.gapDays : 0)));
+    const comps = { persist: gapDays / an.D, sev: clamp(ratio / 5), value: 1, impact: money(an.totalGap) };
+    const { contrib, score: s } = score(comps);
+    out.push({
+      key: "contract|TestPAC", systemName: "TestPAC energy savings are outweighed by yield loss", systemCategory: "Contract economics",
+      affected: "All products, TestPAC contract", metric: `${usd(an.totalGap)} gap vs. ${usd(A.savings)} saved`, revenue: an.totalGap,
+      comps, contrib, score: s,
+      summary: `TestPAC's claimed ${usd(A.savings)} energy saving compares with a modeled ${usd(an.totalGap)} yield gap (environment plus operator deviation). Net, ${usd(Math.abs(an.net))} ${an.net > 0 ? "worse" : "better"} than an ideal facility.`,
+      evidence: [
+        ...an.prods.filter((p) => p.env).map((p) => `${p.name}: ${p.env.gap.toFixed(3)} pp gap, ${num0(p.env.lostUnits)} units, ${usd(p.env.revenue)}.`),
+        ...(an.opRevenue > 0 ? [`Operator deviation: ${usd(an.opRevenue)}.`] : []),
+        `Net after savings: ${usd(-an.net)}, covering ${an.D} days.`,
+      ],
+      checks: [
+        { ok: ratio > 1, text: `Yield gap is ${ratio.toFixed(1)}× the claimed energy savings.` },
+        { ok: false, text: "Caution: the savings figure was supplied by TestPAC and is unverified." },
+        { ok: false, text: "Caution: assumes an ideal facility could be used at the same ASP, with no other extra costs." },
+      ],
+      action: "Do not accept TestPAC pricing at face value. Make the contract conditional on power conditioning and closed-loop dehumidified chillers, or move high-ASP products elsewhere.",
+    });
+  }
+  out.sort((a, b) => b.score - a.score);
+  out.forEach((f, i) => { f.rank = i + 1; f.systemPriority = f.score >= 65 ? "High" : f.score >= 40 ? "Medium" : "Low"; });
+  return { findings: out };
+}
+
+/* ================= Styles ================= */
+
+
+/* ================= Inputs tab ================= */
+function InputsTab({ products, weather, A, setA, onParsed, onRemove, setAsp, onLoadCase, ready, goFindings, notes }) {
+  const [sub, setSub] = useState("upload");
+  const [over, setOver] = useState(false);
+  const [text, setText] = useState("");
+  const [pname, setPname] = useState("");
+  const fileRef = useRef();
+
+  const handleFiles = async (files) => {
+    const results = [];
+    for (const f of Array.from(files)) {
+      try {
+        if (/\.(xlsx|xls)$/i.test(f.name)) {
+          const wb = XLSX.read(await f.arrayBuffer());
+          for (const sn of wb.SheetNames) {
+            const grid = XLSX.utils.sheet_to_json(wb.Sheets[sn], { header: 1, defval: "" });
+            const hint = /^sheet\d*$/i.test(sn) ? f.name : sn;
+            const r = parseGrid(grid, hint);
+            if (r) results.push({ ...r, source: `${f.name} › ${sn}` });
+          }
+        } else {
+          const grid = Papa.parse(await f.text(), { skipEmptyLines: true }).data;
+          const r = parseGrid(grid, f.name);
+          if (r) results.push({ ...r, source: f.name });
+        }
+      } catch (e) { results.push({ kind: "error", source: f.name }); }
+    }
+    onParsed(results, "file");
+  };
+
+  const handlePaste = () => {
+    const grid = Papa.parse(text.trim(), { skipEmptyLines: true }).data;
+    const r = parseGrid(grid, pname || "Pasted product");
+    onParsed(r ? [{ ...r, source: "Pasted data" }] : [], "paste");
+  };
+
+  return (
+    <div className="stack">
+      <div className="panel">
+        <div className="row-between">
+          <div>
+            <h2 style={{ fontSize: 18 }}>Data sources</h2>
+            <p className="tag" style={{ margin: "2px 0 0" }}>One yield matrix per product (operators in rows, Day 1…Day N in columns) plus a Solar Intensity and Humidity file.</p>
+          </div>
+          <button className="btn primary" onClick={onLoadCase}><Icon name="Database" />Load OSAT Investigation/TestPAC Case Data</button>
+        </div>
+        <div className="subtabs" role="tablist" style={{ marginTop: 14 }}>
+          <button role="tab" aria-selected={sub === "upload"} onClick={() => setSub("upload")}>Upload files</button>
+          <button role="tab" aria-selected={sub === "paste"} onClick={() => setSub("paste")}>Paste data</button>
+        </div>
+        {sub === "upload" ? (
+          <div className={"drop" + (over ? " over" : "")}
+            onDragOver={(e) => { e.preventDefault(); setOver(true); }} onDragLeave={() => setOver(false)}
+            onDrop={(e) => { e.preventDefault(); setOver(false); handleFiles(e.dataTransfer.files); }}>
+            <p style={{ margin: "0 0 10px" }}>Drop Apache, Odyssey and weather files here (Excel or CSV). A full workbook with “Apache Raw”, “Odyssey Raw” and “Weather Raw” sheets also works.</p>
+            <button className="btn primary" onClick={() => fileRef.current.click()}><Icon name="Upload" />Choose files</button>
+            <input ref={fileRef} type="file" multiple accept=".csv,.xlsx,.xls,.tsv,.txt" hidden onChange={(e) => handleFiles(e.target.files)} />
+          </div>
+        ) : (
+          <div>
+            <label className="field" style={{ maxWidth: 320, marginTop: 0 }}>
+              <span>Product name (ignored for weather data)</span>
+              <input value={pname} onChange={(e) => setPname(e.target.value)} placeholder="e.g. Apache" />
+            </label>
+            <label className="field"><span>Paste a yield matrix or a weather table (from Excel or CSV)</span>
+              <textarea className="mono" value={text} onChange={(e) => setText(e.target.value)}
+                placeholder={"Operator\tDay 1\tDay 2\tDay 3 …\nJames\t95.479\t95.1605\t94.8755 …\n\nor, for weather:\nMetric\tDay 1\tDay 2 …\nSolar Intensity\t64\t5 …\nHumidity\t35\t4 …"} />
+            </label>
+            <button className="btn primary" style={{ marginTop: 10 }} disabled={!text.trim()} onClick={handlePaste}>Parse pasted data</button>
+          </div>
+        )}
+        {notes.map((n, i) => <p key={i} className={`msg ${n.ok ? "ok" : "err"}`} role={n.ok ? "status" : "alert"}>{n.text}</p>)}
+      </div>
+
+      <div className="panel">
+        <h2 style={{ fontSize: 18, marginBottom: 8 }}>Parsed inputs</h2>
+        {!products.length && !weather ? <p className="tag">Nothing loaded yet.</p> : (
+          <div style={{ overflowX: "auto" }}>
+            <table>
+              <thead><tr><th>Dataset</th><th>Shape</th><th>Mean</th><th>ASP ($)</th><th>Source</th><th></th></tr></thead>
+              <tbody>
+                {products.map((p) => (
+                  <tr key={p.name}>
+                    <td><b>{p.name}</b> <span className="tag">yield</span></td>
+                    <td className="num">{p.data.length} operators × {p.data[0].length} days</td>
+                    <td className="num">{mean(p.data.map(mean)).toFixed(3)}%</td>
+                    <td><input aria-label={`${p.name} ASP`} type="number" value={p.asp} style={{ width: 80 }} onChange={(e) => setAsp(p.name, Number(e.target.value))} /></td>
+                    <td className="tag">{p.source}</td>
+                    <td><button className="btn" onClick={() => onRemove(p.name)}>Remove</button></td>
+                  </tr>
+                ))}
+                {weather && (
+                  <tr>
+                    <td><b>Weather</b> <span className="tag">solar + humidity</span></td>
+                    <td className="num">{weather.solar.length} days</td>
+                    <td className="num">solar {mean(weather.solar).toFixed(1)}, humidity {mean(weather.humidity).toFixed(1)}</td>
+                    <td className="tag">n/a</td><td className="tag">{weather.source}</td>
+                    <td><button className="btn" onClick={() => onRemove("__weather")}>Remove</button></td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+        <div className="row-between" style={{ marginTop: 14 }}>
+          <p className="tag" style={{ margin: 0 }}>{ready ? "Data checks passed. Ready to analyze." : "Needs at least one product matrix and a weather file covering the same number of days."}</p>
+          <button className="btn primary" disabled={!ready} onClick={goFindings}>View prioritized findings</button>
+        </div>
+      </div>
+
+      <div className="panel">
+        <h2 style={{ fontSize: 18 }}>Case assumptions</h2>
+        <div className="assume">
+          {[["units", "Units per lot"], ["savings", "TestPAC claimed savings ($)"], ["idealSolar", "Ideal solar index"], ["idealHum", "Ideal humidity"], ["zThreshold", "Flag operators at z ≤ −"]].map(([k, l]) => (
+            <label className="field" key={k} style={{ marginTop: 0 }}><span>{l}</span>
+              <input type="number" value={A[k]} onChange={(e) => setA({ ...A, [k]: Number(e.target.value) })} /></label>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ================= Findings: detail + review ================= */
+function Badge({ f, review }) {
+  const p = review?.priority ?? f.systemPriority, changed = review && review.priority !== f.systemPriority;
+  return (<span><span className={`pill ${p}`}>{p}</span><div className="tag">{review ? <span className="src human">{changed ? "Human override" : "Human approved"}</span> : <span className="src">System</span>}{changed ? ` was ${f.systemPriority}` : ""}</div></span>);
+}
+
+function DetailPanel({ f, review, onApprove, onSave }) {
+  const effName = review?.name ?? f.systemName, effCat = review?.category ?? f.systemCategory, effPri = review?.priority ?? f.systemPriority;
+  const [pri, setPri] = useState(effPri), [name, setName] = useState(effName), [cat, setCat] = useState(effCat), [note, setNote] = useState("");
+  useEffect(() => { setPri(effPri); setName(effName); setCat(effCat); setNote(""); }, [f.key, effPri, effName, effCat]);
+  const dirty = pri !== effPri || name !== effName || cat !== effCat || note.trim() !== "";
+  return (
+    <aside className="panel" aria-label="Finding detail and review">
+      <h2 style={{ fontSize: 20 }}>{effName}</h2>
+      <p className="tag" style={{ margin: "4px 0 12px" }}>{f.affected}. {f.systemCategory !== effCat ? `Reclassified as ${effCat}. ` : `${effCat}. `}Score {f.score.toFixed(1)}.</p>
+      <p style={{ margin: "0 0 14px" }}>{f.summary}</p>
+
+      <h3 style={{ fontSize: 15, marginBottom: 6 }}>Evidence</h3>
+      {f.evidence.map((e, i) => <blockquote key={i}>{e}</blockquote>)}
+
+      <h3 style={{ fontSize: 15, margin: "14px 0 8px" }}>Evaluation checks</h3>
+      <ul className="checks">{f.checks.map((c, i) => <li key={i}><b className={c.ok ? "ok" : "warn"}>{c.ok ? "Pass" : "Caution"}</b><span>{c.text}</span></li>)}</ul>
+
+      <h3 style={{ fontSize: 15, margin: "14px 0 4px" }}>System recommendation</h3>
+      <p style={{ margin: 0 }}>{f.action}</p>
+
+      <hr style={{ border: 0, borderTop: "1px solid var(--line)", margin: "18px 0 6px" }} />
+      <div className="row-between"><h3 style={{ fontSize: 15 }}>Your review</h3>
+        {review && <span className="src human">{review.status === "approved" ? "Approved" : "Edited"}</span>}</div>
+      {review?.note && <p className="tag" style={{ margin: "6px 0 0" }}>Carried-over note: “{review.note}”</p>}
+      <div className="field"><span>Priority (system: {f.systemPriority})</span>
+        <div className="seg" role="group" aria-label="Priority">{PRIORITIES.map((p) => <button key={p} className={p} aria-pressed={pri === p} onClick={() => setPri(p)}>{p}</button>)}</div></div>
+      <label className="field"><span>Issue name</span><input value={name} onChange={(e) => setName(e.target.value)} /></label>
+      <label className="field"><span>Category (system: {f.systemCategory})</span>
+        <select value={cat} onChange={(e) => setCat(e.target.value)}>
+          {(CATEGORIES.includes(cat) ? CATEGORIES : [cat, ...CATEGORIES]).map((c) => <option key={c} value={c}>{c}</option>)}
+        </select></label>
+      <label className="field"><span>Reviewer note (why you changed it)</span><textarea rows={3} value={note} onChange={(e) => setNote(e.target.value)} /></label>
+      <div className="row-between" style={{ marginTop: 14 }}>
+        <button className="btn" onClick={() => onApprove(f)}><Icon name="Check" />Approve recommendation</button>
+        <button className="btn primary" disabled={!dirty} onClick={() => onSave(f, { priority: pri, name, category: cat, note: note.trim() })}><Icon name="Save" />Save changes</button>
+      </div>
+    </aside>
+  );
+}
+
+function FindingsTab({ an, findings, A, W, setW, reviews, selKey, setSelKey, onApprove, onSave }) {
+  const [showW, setShowW] = useState(false);
+  const sel = findings.find((f) => f.key === selKey) || findings[0];
+  const nm = (f) => reviews[f.key]?.name ?? f.systemName;
+  if (!findings.length) return <div className="panel"><h2 style={{ fontSize: 18 }}>No findings yet</h2><p className="tag">Load product and weather data on the Inputs tab.</p></div>;
+  return (
+    <>
+      <div className="row-between">
+        <p className="tag" style={{ margin: 0 }}>{findings.length} findings from {an.prods.length} products, {an.D} days, {an.prods[0].nOps} operators.{!an.weatherOK && " Weather data missing or too short, so environmental findings are skipped."}</p>
+        <button className="btn" aria-expanded={showW} onClick={() => setShowW((s) => !s)}>Scoring weights</button>
+      </div>
+      {showW && <div className="panel" style={{ marginTop: 12 }}>
+        <p className="tag" style={{ margin: 0 }}>Relative weights. Persistence = share of days affected (or weather R²). Severity = effect size (|z| or yield gap). Product value = ASP vs. the highest-ASP product. Revenue impact is log-scaled, with $10M = 100%.</p>
+        <div className="weights">{[["persist", "Persistence"], ["sev", "Severity"], ["value", "Product value"], ["impact", "Revenue impact"]].map(([k, l]) => (
+          <label key={k}><span className="tag">{l}: {W[k]}</span><input type="range" min="0" max="100" value={W[k]} onChange={(e) => setW({ ...W, [k]: Number(e.target.value) })} /></label>))}</div>
+      </div>}
+
+      <section aria-label="Executive summary" className="top3">
+        {findings.slice(0, 3).map((f, i) => (
+          <button key={f.key} className="t3" onClick={() => setSelKey(f.key)}>
+            <div className="row-between" style={{ marginBottom: 8 }}><span className="big num">{Math.round(f.score)}</span><Badge f={f} review={reviews[f.key]} /></div>
+            <h3>{nm(f)}</h3>
+            <p className="why">{f.summary}{i === 0 ? " Act on this first." : ""}</p>
+          </button>))}
+      </section>
+
+      <div className="layout">
+        <section className="panel" style={{ padding: 0 }} aria-label="Prioritization matrix">
+          <div style={{ padding: "16px 20px 0" }}>
+            <h2 style={{ fontSize: 18, marginBottom: 8 }}>Prioritization matrix</h2>
+            <div className="legend">{[["persist", "Persistence"], ["sev", "Severity"], ["value", "Product value"], ["impact", "Revenue impact"]].map(([k, l]) => <span key={k} style={{ "--c": COMP_COLORS[k] }}>{l}</span>)}</div>
+          </div>
+          <div style={{ overflowX: "auto" }}>
+            <table>
+              <thead><tr><th>#</th><th>Finding</th><th>Impact score</th><th>Key metric</th><th>Revenue at risk</th><th>Priority</th></tr></thead>
+              <tbody>{findings.map((f) => (
+                <tr key={f.key} className="row" aria-selected={sel?.key === f.key} onClick={() => setSelKey(f.key)}>
+                  <td className="num">{f.rank}</td>
+                  <td><b>{nm(f)}</b><div className="tag">{f.affected}</div><div className="tag" style={{ maxWidth: 280 }}>{f.action}</div></td>
+                  <td><div className="num" style={{ fontWeight: 600 }}>{f.score.toFixed(1)}</div>
+                    <div className="bar" title="Contribution of each factor">{Object.keys(COMP_COLORS).map((k) => <i key={k} style={{ width: `${f.contrib[k]}%`, background: COMP_COLORS[k] }} />)}</div></td>
+                  <td className="num tag" style={{ color: "var(--ink)" }}>{f.metric}</td>
+                  <td className="num">{usd(f.revenue)}</td>
+                  <td><Badge f={f} review={reviews[f.key]} /></td>
+                </tr>))}</tbody>
+            </table>
+          </div>
+        </section>
+        {sel && <DetailPanel f={sel} review={reviews[sel.key]} onApprove={onApprove} onSave={onSave} />}
+      </div>
+    </>
+  );
+}
+
+/* ================= Icons (Lucide via CDN) ================= */
+function Icon({ name, size = 16 }) {
+  const node = window.lucide && window.lucide.icons && window.lucide.icons[name];
+  if (!node) return null;
+  const kids = typeof node[0] === "string" ? node[2] || [] : node;
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flex: "none" }}>
+      {kids.map(([tag, attrs], i) => React.createElement(tag, { key: i, ...attrs }))}
+    </svg>
+  );
+}
+
+/* ================= Lightweight SVG charts ================= */
+const CM = { l: 56, r: 14, t: 12, b: 30 };
+function niceTicks(min, max, n = 5) {
+  if (!Number.isFinite(min) || !Number.isFinite(max)) return [0, 1];
+  if (min === max) { min -= 1; max += 1; }
+  const step0 = (max - min) / n, mag = Math.pow(10, Math.floor(Math.log10(step0))), nm = step0 / mag;
+  const step = (nm < 1.5 ? 1 : nm < 3 ? 2 : nm < 7 ? 5 : 10) * mag;
+  const out = [];
+  for (let v = Math.floor(min / step) * step; v <= max + step * 0.5; v += step) out.push(+v.toFixed(10));
+  return out;
+}
+const tickFmt = (v) => String(+Number(v).toFixed(3));
+function ChartLegend({ items }) {
+  return <div className="legend" style={{ margin: "6px 0 0" }}>{items.map((i) => <span key={i.name} style={{ "--c": i.color }}>{i.name}</span>)}</div>;
+}
+function Grid({ ticks, Y, W }) {
+  return ticks.map((t) => (
+    <g key={t}>
+      <line x1={CM.l} x2={W - CM.r} y1={Y(t)} y2={Y(t)} stroke="#E6EBEF" />
+      <text x={CM.l - 6} y={Y(t) + 4} fontSize="11" textAnchor="end" fill="#5C6B78">{tickFmt(t)}</text>
+    </g>
+  ));
+}
+
+function LineChart({ data, xKey, series, fmt = (v) => v.toFixed(2), h = 260 }) {
+  const W = 640, n = data.length, [hi, setHi] = useState(null);
+  const ys = data.flatMap((r) => series.map((s) => r[s.key])).filter((v) => typeof v === "number");
+  const ticks = niceTicks(Math.min(...ys), Math.max(...ys));
+  const y0 = ticks[0], y1 = ticks[ticks.length - 1];
+  const X = (i) => CM.l + (i / Math.max(1, n - 1)) * (W - CM.l - CM.r);
+  const Y = (v) => h - CM.b - ((v - y0) / (y1 - y0)) * (h - CM.t - CM.b);
+  const step = Math.max(1, Math.ceil(n / 8));
+  const move = (e) => {
+    const r = e.currentTarget.getBoundingClientRect(), x = ((e.clientX - r.left) / r.width) * W;
+    setHi(clamp(Math.round(((x - CM.l) / (W - CM.l - CM.r)) * (n - 1)), 0, n - 1));
+  };
+  return (
+    <div>
+      <svg viewBox={`0 0 ${W} ${h}`} style={{ width: "100%", height: "auto", display: "block" }} onMouseMove={move} onMouseLeave={() => setHi(null)} role="img">
+        <Grid ticks={ticks} Y={Y} W={W} />
+        {data.map((r, i) => (i % step === 0 ? <text key={i} x={X(i)} y={h - CM.b + 16} fontSize="11" textAnchor="middle" fill="#5C6B78">{r[xKey]}</text> : null))}
+        {series.map((s) => <polyline key={s.key} fill="none" stroke={s.color} strokeWidth="2" points={data.map((r, i) => `${X(i)},${Y(r[s.key])}`).join(" ")} />)}
+        {hi != null && <line x1={X(hi)} x2={X(hi)} y1={CM.t} y2={h - CM.b} stroke="#17212B" strokeDasharray="3 3" />}
+      </svg>
+      <p className="tag" style={{ margin: "4px 0 0", minHeight: 20 }}>
+        {hi != null ? `Day ${data[hi][xKey]}: ` + series.map((s) => `${s.key} ${fmt(data[hi][s.key])}`).join(", ") : "Hover for daily values"}
+      </p>
+      <ChartLegend items={series.map((s) => ({ name: s.key, color: s.color }))} />
+    </div>
+  );
+}
+
+function ScatterChart({ series, h = 260 }) {
+  const W = 640, ys = series.flatMap((s) => s.pts.map((p) => p.y));
+  const ticks = niceTicks(Math.min(...ys), Math.max(...ys));
+  const y0 = ticks[0], y1 = ticks[ticks.length - 1];
+  const X = (v) => CM.l + (v / 100) * (W - CM.l - CM.r);
+  const Y = (v) => h - CM.b - ((v - y0) / (y1 - y0)) * (h - CM.t - CM.b);
+  return (
+    <div>
+      <svg viewBox={`0 0 ${W} ${h}`} style={{ width: "100%", height: "auto", display: "block" }} role="img">
+        <Grid ticks={ticks} Y={Y} W={W} />
+        {[0, 20, 40, 60, 80, 100].map((v) => <text key={v} x={X(v)} y={h - CM.b + 16} fontSize="11" textAnchor="middle" fill="#5C6B78">{v}</text>)}
+        {series.map((s) => s.pts.map((p, i) => <circle key={s.name + i} cx={X(p.x)} cy={Y(p.y)} r="4" fill={s.color} fillOpacity="0.75"><title>{`${s.name}: x ${p.x}, yield ${p.y.toFixed(3)}%`}</title></circle>))}
+      </svg>
+      <ChartLegend items={series.map((s) => ({ name: s.name, color: s.color }))} />
+    </div>
+  );
+}
+
+function BarChart({ data, refY, rot = false, fmt = (v) => v.toFixed(2), h = 260 }) {
+  const W = 640, B = rot ? 74 : 50, vals = [0, ...data.map((d) => d.value), ...(refY != null ? [refY] : [])];
+  const ticks = niceTicks(Math.min(...vals), Math.max(...vals));
+  const y0 = ticks[0], y1 = ticks[ticks.length - 1];
+  const Y = (v) => h - B - ((v - y0) / (y1 - y0)) * (h - CM.t - B);
+  const bw = (W - CM.l - CM.r) / data.length;
+  const lines = (s) => { const out = []; let cur = ""; s.split(" ").forEach((w) => { if ((cur + " " + w).trim().length > 15 && cur) { out.push(cur); cur = w; } else cur = (cur + " " + w).trim(); }); out.push(cur); return out; };
+  return (
+    <svg viewBox={`0 0 ${W} ${h}`} style={{ width: "100%", height: "auto", display: "block" }} role="img">
+      {ticks.map((t) => (
+        <g key={t}><line x1={CM.l} x2={W - CM.r} y1={Y(t)} y2={Y(t)} stroke="#E6EBEF" />
+          <text x={CM.l - 6} y={Y(t) + 4} fontSize="11" textAnchor="end" fill="#5C6B78">{tickFmt(t)}</text></g>
+      ))}
+      <line x1={CM.l} x2={W - CM.r} y1={Y(0)} y2={Y(0)} stroke="#5C6B78" />
+      {data.map((d, i) => {
+        const x = CM.l + i * bw + bw * 0.15, top = Math.min(Y(d.value), Y(0)), ht = Math.abs(Y(d.value) - Y(0));
+        const cx = CM.l + i * bw + bw / 2, ly = h - B + 14;
+        return (
+          <g key={d.name}>
+            <rect x={x} y={top} width={bw * 0.7} height={Math.max(1, ht)} fill={d.color}><title>{`${d.name}: ${fmt(d.value)}`}</title></rect>
+            {rot
+              ? <text transform={`rotate(-60 ${cx} ${ly})`} x={cx} y={ly} fontSize="11" textAnchor="end" fill="#5C6B78">{d.name}</text>
+              : <text x={cx} y={ly} fontSize="11" textAnchor="middle" fill="#5C6B78">{lines(d.name).map((l, k) => <tspan key={k} x={cx} dy={k ? 13 : 0}>{l}</tspan>)}</text>}
+          </g>
+        );
+      })}
+      {refY != null && <line x1={CM.l} x2={W - CM.r} y1={Y(refY)} y2={Y(refY)} stroke="#B23A2E" strokeDasharray="4 3" />}
+    </svg>
+  );
+}
+
+/* ================= Dashboard ================= */
+function Dashboard({ an, A }) {
+  const [pi, setPi] = useState(0), [opSel, setOpSel] = useState(null), [xvar, setXvar] = useState("solar");
+  useEffect(() => { setOpSel(null); }, [pi]);
+  if (!an) return <div className="panel"><p className="tag">Load data on the Inputs tab to see the dashboard.</p></div>;
+  const p = an.prods[Math.min(pi, an.prods.length - 1)];
+  const op = p.ops.find((o) => o.name === opSel) || p.flagged[0] || p.ops[0];
+  const days = Array.from({ length: an.D }, (_, d) => d + 1);
+  const dailyData = days.map((d, i) => { const r = { day: d }; an.prods.forEach((q) => { r[q.name] = q.dailyAll[i]; }); if (an.weatherOK) { r.Solar = an.solar[i]; r.Humidity = an.hum[i]; } return r; });
+  const scatter = an.prods.map((q) => ({ name: q.name, color: q.color, pts: q.dailyBase.map((y, i) => ({ x: (xvar === "solar" ? an.solar : an.hum)[i], y })) }));
+  const fin = [{ name: "TestPAC energy savings", value: A.savings / 1e6, color: "#0F5C6E" },
+    ...an.prods.filter((q) => q.env).map((q) => ({ name: `${q.name} yield gap`, value: q.env.revenue / 1e6, color: "#B23A2E" })),
+    ...(an.opRevenue > 0 ? [{ name: "Operator deviation", value: an.opRevenue / 1e6, color: "#C0675A" }] : []),
+    ...(an.weatherOK ? [{ name: "Net deficit", value: Math.max(0, an.net) / 1e6, color: "#2B2F3A" }] : [])];
+
+  return (
+    <div className="stack">
+      <div className="kpis">
+        {an.prods.map((q) => <div className="kpi" key={q.name}><div className="v">{q.overall.toFixed(3)}%</div><div className="l">{q.name} average yield (${q.asp} ASP)</div></div>)}
+        <div className="kpi"><div className="v">{sum(an.prods.map((q) => q.flagged.length))}</div><div className="l">Operators flagged (z ≤ −{A.zThreshold})</div></div>
+        <div className="kpi"><div className="v">{usd(sum(an.prods.map((q) => q.opRevenue)))}</div><div className="l">Cost of operator deviations</div></div>
+        {an.weatherOK && <div className="kpi"><div className="v">{usd(an.totalGap)}</div><div className="l">Modeled yield gap vs. ideal facility</div></div>}
+        {an.weatherOK && <div className="kpi"><div className="v" style={{ color: an.net > 0 ? "var(--hi)" : "var(--lo)" }}>{usd(-an.net)}</div><div className="l">Net after {usd(A.savings)} energy savings</div></div>}
+      </div>
+
+      <div className="grid2">
+        <div className="panel"><h2 style={{ fontSize: 17, marginBottom: 8 }}>Daily average yield (%)</h2>
+          <LineChart data={dailyData} xKey="day" series={an.prods.map((q) => ({ key: q.name, color: q.color }))} fmt={(v) => v.toFixed(3)} /></div>
+        {an.weatherOK && <div className="panel"><h2 style={{ fontSize: 17, marginBottom: 8 }}>Solar intensity and humidity by day</h2>
+          <LineChart data={dailyData} xKey="day" series={[{ key: "Solar", color: "#C9A24B" }, { key: "Humidity", color: "#6B8CA8" }]} fmt={(v) => v.toFixed(0)} /></div>}
+      </div>
+
+      {an.weatherOK && <div className="grid2">
+        <div className="panel">
+          <div className="row-between"><h2 style={{ fontSize: 17 }}>Yield vs. weather</h2>
+            <div className="seg" role="group" aria-label="Weather variable">{[["solar", "Solar"], ["hum", "Humidity"]].map(([k, l]) => <button key={k} aria-pressed={xvar === k} onClick={() => setXvar(k)}>{l}</button>)}</div></div>
+          <p className="tag" style={{ margin: "2px 0 6px" }}>Each point is one day; x-axis is {xvar === "solar" ? "solar intensity" : "humidity"}. Flagged operators excluded from the facility baseline.</p>
+          <ScatterChart series={scatter} />
+        </div>
+        <div className="panel"><h2 style={{ fontSize: 17, marginBottom: 8 }}>Weather model</h2>
+          <div style={{ overflowX: "auto" }}><table>
+            <thead><tr><th></th>{an.prods.map((q) => <th key={q.name}>{q.name}</th>)}</tr></thead>
+            <tbody>
+              {[["+10 solar points (pp)", (q) => sgn(q.model.b1 * 10, 3)], ["+10 humidity points (pp)", (q) => sgn(q.model.b2 * 10, 3)], ["R²", (q) => q.model.r2.toFixed(4)],
+                ["Modeled ideal yield", (q) => q.env.ideal.toFixed(3) + "%"], ["Environmental gap (pp)", (q) => q.env.gap.toFixed(3)], ["Lost units", (q) => num0(q.env.lostUnits)], ["Revenue impact", (q) => usd(q.env.revenue)]]
+                .map(([l, fn]) => <tr key={l}><td>{l}</td>{an.prods.map((q) => <td className="num" key={q.name}>{fn(q)}</td>)}</tr>)}
+            </tbody></table></div>
+          <h3 style={{ fontSize: 14, margin: "14px 0 6px" }}>Average yield by weather band</h3>
+          <div style={{ overflowX: "auto" }}><table>
+            <thead><tr><th>Band</th>{an.prods.map((q) => <th key={q.name + "s"}>{q.name} by solar</th>)}{an.prods.map((q) => <th key={q.name + "h"}>{q.name} by humidity</th>)}</tr></thead>
+            <tbody>{["Low", "Medium", "High"].map((b, i) => <tr key={b}><td>{b}</td>
+              {an.prods.map((q) => <td className="num" key={q.name + "s"}>{q.bands.solar[i] == null ? "n/a" : q.bands.solar[i].toFixed(3)}</td>)}
+              {an.prods.map((q) => <td className="num" key={q.name + "h"}>{q.bands.hum[i] == null ? "n/a" : q.bands.hum[i].toFixed(3)}</td>)}</tr>)}</tbody></table></div>
+        </div>
+      </div>}
+
+      <div className="panel">
+        <div className="row-between"><h2 style={{ fontSize: 17 }}>Operator abnormalities</h2>
+          <div className="seg" role="group" aria-label="Product">{an.prods.map((q, i) => <button key={q.name} aria-pressed={i === pi} onClick={() => setPi(i)}>{q.name}</button>)}</div></div>
+        <p className="tag" style={{ margin: "2px 0 8px" }}>Z-score of each operator's average against all {p.nOps} operator averages. Operators at or below −{A.zThreshold} (dashed line) are flagged in red.</p>
+        <BarChart data={p.ops.map((o) => ({ name: o.name, value: o.z, color: o.flagged ? "#B23A2E" : "#6B8CA8" }))} refY={-A.zThreshold} rot fmt={(v) => sgn(v)} />
+        <div className="grid2" style={{ marginTop: 16 }}>
+          <div style={{ overflowX: "auto", maxHeight: 340, overflowY: "auto" }}><table>
+            <thead><tr><th>Operator</th><th>Avg</th><th>Δ vs peers</th><th>Z</th><th>Lost units</th><th>Revenue</th></tr></thead>
+            <tbody>{[...p.ops].sort((a, b) => a.z - b.z).map((o) => (
+              <tr key={o.name} className={"row" + (o.flagged ? " flag" : "")} onClick={() => setOpSel(o.name)} aria-selected={op.name === o.name}>
+                <td>{o.name}{o.flagged && <b style={{ color: "var(--hi)" }}> flagged</b>}</td><td className="num">{o.avg.toFixed(3)}</td><td className="num">{sgn(o.delta, 3)}</td><td className="num">{sgn(o.z)}</td>
+                <td className="num">{o.lostUnits ? num0(o.lostUnits) : "0"}</td><td className="num">{o.revenue ? usd(o.revenue) : "$0"}</td></tr>))}</tbody></table></div>
+          <div>
+            <label className="field" style={{ marginTop: 0 }}><span>Daily comparison for operator</span>
+              <select value={op.name} onChange={(e) => setOpSel(e.target.value)}>{p.ops.map((o) => <option key={o.name}>{o.name}</option>)}</select></label>
+            <p className="tag" style={{ margin: "6px 0" }}>{op.name} was below the peer average on {op.below} of {p.D} days and the lowest of all operators on {op.lowest}. {an.prods.filter((q) => q !== p).map((q) => { const o2 = q.ops.find((x) => x.name === op.name); return o2 ? `${q.name} z ${sgn(o2.z)}.` : ""; }).join(" ")}</p>
+            <LineChart h={230} data={days.map((d, i) => ({ day: d, [op.name]: op.daily[i], "Peer average": op.peerDaily[i] }))} xKey="day"
+              series={[{ key: op.name, color: "#B23A2E" }, { key: "Peer average", color: "#6B8CA8" }]} fmt={(v) => v.toFixed(3)} />
+          </div>
+        </div>
+      </div>
+
+      {an.weatherOK && <div className="panel"><h2 style={{ fontSize: 17, marginBottom: 4 }}>TestPAC economics ($M)</h2>
+        <p className="tag" style={{ margin: "0 0 8px" }}>Modeled yield gap vs. ideal conditions compared with claimed energy savings. A scenario estimate, not an observed accounting loss.</p>
+        <BarChart data={fin} fmt={(v) => `$${v.toFixed(2)}M`} h={250} /></div>}
+    </div>
+  );
+}
+
+/* ================= History ================= */
+function HistoryTab({ findings, reviews, log, onClear }) {
+  const [confirming, setConfirming] = useState(false);
+  const fmt = (t) => new Date(t).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  const regs = Object.entries(reviews);
+  const context = log.filter((l) => l.field !== "Approved").map((l) => `- [${l.field}] ${l.issue}: system "${l.from}" → reviewer "${l.to}".${l.note ? ` Reason: ${l.note}` : ""}`).join("\n");
+  if (!log.length) return <div className="panel"><h2 style={{ fontSize: 18 }}>No review history yet</h2><p className="tag">Approve or edit a finding on the Findings tab. Each decision appears here next to what the system originally recommended, and is applied automatically to matching findings in future datasets.</p></div>;
+  return (
+    <div className="stack">
+      <div className="panel">
+        <h2 style={{ fontSize: 18, marginBottom: 8 }}>Decision register</h2>
+        <p className="tag" style={{ margin: "0 0 8px" }}>Current state of every reviewed finding. System output and human decision are shown separately.</p>
+        <div style={{ overflowX: "auto" }}><table>
+          <thead><tr><th>Finding key</th><th>System priority</th><th>Reviewer priority</th><th>Name / category</th><th>Status</th><th>Latest note</th></tr></thead>
+          <tbody>{regs.map(([k, r]) => { const f = findings.find((x) => x.key === k); return (
+            <tr key={k}><td className="tag">{k}</td>
+              <td>{f ? <span className={`pill ${f.systemPriority}`}>{f.systemPriority}</span> : <span className="tag">not in current data</span>}</td>
+              <td><span className={`pill ${r.priority}`}>{r.priority}</span></td>
+              <td>{r.name}<div className="tag">{r.category}</div></td><td><span className="src human">{r.status === "approved" ? "Approved" : "Edited"}</span></td>
+              <td>{r.note || <span className="tag">No note</span>}</td></tr>); })}</tbody></table></div>
+      </div>
+      <div className="panel">
+        <div className="row-between" style={{ marginBottom: 8 }}>
+          <div><h2 style={{ fontSize: 18 }}>User review history</h2><p className="tag" style={{ margin: 0 }}>What the system recommended, what the reviewer changed, and why.</p></div>
+          {confirming ? <span><button className="btn" onClick={() => { onClear(); setConfirming(false); }}>Yes, clear all</button> <button className="btn" onClick={() => setConfirming(false)}>Cancel</button></span>
+            : <button className="btn" onClick={() => setConfirming(true)}>Clear history</button>}
+        </div>
+        <div style={{ overflowX: "auto" }}><table>
+          <thead><tr><th>When</th><th>Finding</th><th>Change</th><th>System recommended → Reviewer set</th><th>Reviewer note</th></tr></thead>
+          <tbody>{log.map((l) => <tr key={l.id}><td className="num tag">{fmt(l.ts)}</td><td>{l.issue}</td><td>{l.field}</td>
+            <td>{l.field === "Approved" ? <span className="new">Approved as recommended ({l.to})</span> : <><span className="old">{l.from}</span> → <span className="new">{l.to}</span></>}</td>
+            <td>{l.note || <span className="tag">No note</span>}</td></tr>)}</tbody></table></div>
+      </div>
+      <div className="panel">
+        <h2 style={{ fontSize: 18 }}>Context for the next cycle</h2>
+        <p className="tag" style={{ margin: "2px 0 8px" }}>Corrections are re-applied automatically to matching findings. This summary can also be pasted into a prompt as reviewer context.</p>
+        <textarea className="mono" readOnly value={context || "No corrections recorded yet (approvals only)."} onFocus={(e) => e.target.select()} />
+      </div>
+    </div>
+  );
+}
+
+/* ================= App ================= */
+function App() {
+  const [tab, setTab] = useState("inputs");
+  const [products, setProducts] = useState([]);
+  const [weather, setWeather] = useState(null);
+  const [A, setA] = useState(DEFAULT_A);
+  const [W, setW] = useState(DEFAULT_W);
+  const [notes, setNotes] = useState([]);
+  const [selKey, setSelKey] = useState(null);
+  const [reviews, setReviews] = useState({});
+  const [log, setLog] = useState([]);
+  const [loaded, setLoaded] = useState(false);
+  const [toast, setToast] = useState("");
+
+  useEffect(() => { (async () => { try { const r = await store.get(STORE_KEY); const s = JSON.parse(r.value); setReviews(s.reviews || {}); setLog(s.log || []); } catch (e) { /* none saved */ } setLoaded(true); })(); }, []);
+  useEffect(() => { if (!loaded) return; (async () => { try { await store.set(STORE_KEY, JSON.stringify({ reviews, log }), false); } catch (e) { console.error("Storage error:", e); } })(); }, [reviews, log, loaded]);
+  useEffect(() => { if (toast) { const t = setTimeout(() => setToast(""), 2200); return () => clearTimeout(t); } }, [toast]);
+
+  const aspFor = (name) => ASP_DEFAULT[name.toLowerCase()] ?? 100;
+  const onParsed = (results, via) => {
+    const msgs = [];
+    let np = [...products], nw = weather;
+    const good = results.filter((r) => r.kind === "product" || r.kind === "weather");
+    results.filter((r) => r.kind === "error").forEach((r) => msgs.push({ ok: false, text: `Couldn't read ${r.source}.` }));
+    for (const r of good) {
+      if (r.kind === "product") {
+        const prev = np.find((p) => p.name.toLowerCase() === r.name.toLowerCase());
+        np = [...np.filter((p) => p !== prev), { name: r.name, operators: r.operators, data: r.data, asp: prev?.asp ?? aspFor(r.name), source: r.source }];
+        msgs.push({ ok: true, text: `Parsed ${r.name}: ${r.operators.length} operators × ${r.data[0].length} days.` });
+      } else { nw = { solar: r.solar, humidity: r.humidity, source: r.source }; msgs.push({ ok: true, text: `Parsed weather: ${r.solar.length} days of solar intensity and humidity.` }); }
+    }
+    if (!good.length) msgs.push({ ok: false, text: via === "paste" ? "Couldn't recognize that data. Use a header row with Operator and Day 1…Day N, or rows labeled Solar Intensity and Humidity." : "No yield matrix or weather table found. Expect an Operator column with Day 1…Day N headers, or Solar Intensity and Humidity rows." });
+    setProducts(np); setWeather(nw); setNotes(msgs);
+  };
+  const loadCase = () => {
+    setProducts(["apache", "odyssey"].map((k) => ({ name: k[0].toUpperCase() + k.slice(1), operators: CASE[k].map((r) => r[0]), data: CASE[k].map((r) => r.slice(1)), asp: ASP_DEFAULT[k], source: "OSAT Investigation/TestPAC Case Data" })));
+    setWeather({ solar: CASE.solar, humidity: CASE.humidity, source: "OSAT Investigation/TestPAC Case Data" });
+    setA(DEFAULT_A); setNotes([{ ok: true, text: "Loaded Apache, Odyssey and weather data from the OSAT Investigation/TestPAC case data." }]); setSelKey(null); setTab("findings");
+  };
+  const remove = (name) => { if (name === "__weather") setWeather(null); else setProducts((p) => p.filter((x) => x.name !== name)); };
+  const setAsp = (name, v) => setProducts((p) => p.map((x) => (x.name === name ? { ...x, asp: v } : x)));
+
+  const ready = products.length > 0 && !!weather && products.every((p) => p.data[0].length === weather.solar.length);
+  const an = useMemo(() => (products.length ? analyze(products, weather, A) : null), [products, weather, A]);
+  const { findings } = useMemo(() => buildFindings(an, A, W), [an, A, W]);
+
+  const approve = (f) => {
+    const r = reviews[f.key];
+    setReviews((p) => ({ ...p, [f.key]: { ...(r || {}), name: r?.name ?? f.systemName, category: r?.category ?? f.systemCategory, priority: r?.priority ?? f.systemPriority, note: r?.note ?? "", status: r?.status === "edited" ? "edited" : "approved", ts: Date.now() } }));
+    setLog((l) => [{ id: Date.now() + Math.random(), ts: Date.now(), issue: f.systemName, field: "Approved", from: "", to: r?.priority ?? f.systemPriority, note: "" }, ...l]);
+    setToast("Approved");
+  };
+  const save = (f, d) => {
+    const prev = reviews[f.key], entries = [];
+    const add = (field, from, to, was) => { if (to !== was) entries.push({ id: Date.now() + Math.random(), ts: Date.now(), issue: f.systemName, field, from, to, note: d.note }); };
+    add("Priority", f.systemPriority, d.priority, prev?.priority ?? f.systemPriority);
+    add("Issue name", f.systemName, d.name, prev?.name ?? f.systemName);
+    add("Category", f.systemCategory, d.category, prev?.category ?? f.systemCategory);
+    if (!entries.length && d.note) entries.push({ id: Date.now() + Math.random(), ts: Date.now(), issue: f.systemName, field: "Note", from: "", to: "(note added)", note: d.note });
+    setReviews((p) => ({ ...p, [f.key]: { priority: d.priority, name: d.name, category: d.category, note: d.note || prev?.note || "", status: "edited", ts: Date.now() } }));
+    setLog((l) => [...entries, ...l]); setToast("Saved");
+  };
+
+  const TABS = [["inputs", "Inputs & parsing", "Upload"], ["findings", "Prioritized findings", "ListChecks"], ["dashboard", "Yield & weather dashboard", "Activity"], ["history", `Review history${log.length ? ` (${log.length})` : ""}`, "History"]];
+  return (
+    <div className="pc">
+      <header className="pc-head">
+        <div><h1>Product Priority Cleanser</h1><p>BRUIN / TestPAC yield investigation: Apache and Odyssey</p></div>
+      </header>
+      <nav className="pc-tabs" role="tablist">{TABS.map(([k, l, ic]) => <button key={k} className="pc-tab" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}><Icon name={ic} size={15} />{l}</button>)}</nav>
+      <main className="pc-main">
+        {tab === "inputs" && <InputsTab {...{ products, weather, A, setA, onParsed, setAsp, notes, ready }} onRemove={remove} onLoadCase={loadCase} goFindings={() => setTab("findings")} />}
+        {tab === "findings" && <FindingsTab {...{ an, findings, A, W, setW, reviews, selKey, setSelKey }} onApprove={approve} onSave={save} />}
+        {tab === "dashboard" && <Dashboard an={an} A={A} />}
+        {tab === "history" && <HistoryTab findings={findings} reviews={reviews} log={log} onClear={() => { setLog([]); setReviews({}); }} />}
+      </main>
+      <footer className="text-center text-xs text-slate-500 py-6">Yield figures are modeled from the data you load. Statistical flags are leads for investigation, not proof of wrongdoing.</footer>
+      {toast && <div className="toast" role="status">{toast}</div>}
+    </div>
+  );
+}
+
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+
+</script>
+</body>
+</html>
